@@ -1,0 +1,20 @@
+{
+  "name": "contracts",
+  "version": "1.0.0",
+  "type": "module",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ignition": "^3.0.7",
+    "@nomicfoundation/hardhat-toolbox-viem": "^5.0.2",
+    "@types/node": "^22.8.5",
+    "ethers": "^6.16.0",
+    "forge-std": "foundry-rs/forge-std#v1.9.4",
+    "hardhat": "^3.1.5",
+    "typescript": "~5.8.0",
+    "viem": "^2.43.0"
+  },
+  "dependencies": {
+    "@hyperbridge/core": "^1.5.2",
+    "@hyperbridge/sdk": "^1.5.1",
+    "@openzeppelin/contracts": "^5.4.0"
+  }
+}
