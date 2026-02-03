@@ -31,4 +31,9 @@ contract TokenBridgeTest is Test {
     feeToken.mint(user, INITIAL_BALANCE);
     vm.deal(user, 10 ether);
   }
+
+  function test_Constructor() public view {
+    assertEq(address(tokenBridge.tokenGateway()), address(mockGateway));
+    assertEq(tokenBridge.feeToken(), address(feeToken));
+  }
 }
