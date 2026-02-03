@@ -7,6 +7,8 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 error InsufficientAmount();
 error InvalidRecipient();
+error InsufficientBalance();
+error InsufficientAllowance();
 
 contract TokenBridge {
     ITokenGateway public immutable tokenGateway;
@@ -43,8 +45,12 @@ contract TokenBridge {
         uint256 relayerFee,
         uint64 timeout
     ) external payable {
+        IERC20 erc20 = IERC20(token);
+        
         if (amount == 0) revert InsufficientAmount();
         if (recipient == address(0)) revert InvalidRecipient();
+        if (erc20.balanceOf(msg.sender) < amount) revert InsufficientBalance();
+        if (erc20.allowance(msg.sender, address(this)) < amount) revert InsufficientAllowance();
 
         // Convert the token address to assetId
         bytes32 assetId = deriveAssetId(token);
