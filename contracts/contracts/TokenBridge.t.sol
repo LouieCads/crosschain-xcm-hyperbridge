@@ -139,4 +139,23 @@ contract TokenBridgeTest is Test {
 
     vm.stopPrank();
   }
+
+  function test_BridgeTokens_RevertsOnInsufficientAllowance() public {
+    vm.startPrank(user);
+
+    bytes memory destChain = bytes("ethereum");
+
+    vm.expectRevert(InsufficientAllowance.selector);
+    tokenBridge.bridgeTokens{value: 0.1 ether}(
+      address(mockToken),
+      BRIDGE_AMOUNT,
+      recipient,
+      destChain,
+      true,
+      RELAYER_FEE,
+      TIMEOUT
+    );
+
+    vm.stopPrank();
+  }
 }
