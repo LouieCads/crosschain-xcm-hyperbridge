@@ -158,4 +158,26 @@ contract TokenBridgeTest is Test {
 
     vm.stopPrank();
   }
+
+  function test_BridgeTokens_WithRedeemFalse() public {
+    vm.startPrank(user);
+
+    mockToken.approve(address(tokenBridge), BRIDGE_AMOUNT);
+    bytes memory destChain = bytes("bsc");
+
+    tokenBridge.bridgeTokens{value: 0.1 ether}(
+      address(mockToken),
+      BRIDGE_AMOUNT,
+      recipient,
+      destChain,
+      false,
+      RELAYER_FEE,
+      TIMEOUT
+    );
+
+    vm.stopPrank();
+
+    TeleportParams memory params = mockGateway.lastTeleportParams();
+    assertFalse(params.redeem);
+  }
 }
