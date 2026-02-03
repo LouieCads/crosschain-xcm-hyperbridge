@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test, console} from "forge-std/Test.sol";
-import {TokenBridge, InsufficientAmount, InvalidRecipient} from "./TokenBridge.sol";
+import {TokenBridge, InsufficientAmount, InvalidRecipient, InsufficientBalance, InsufficientAllowance} from "./TokenBridge.sol";
 import {TeleportParams} from "@hyperbridge/core/contracts/apps/TokenGateway.sol";
 import {MockERC20} from "./mocks/MockERC20.sol";
 import {MockTokenGateway} from "./mocks/MockTokenGateway.sol";
@@ -111,6 +111,26 @@ contract TokenBridgeTest is Test {
       address(mockToken),
       BRIDGE_AMOUNT,
       address(0),
+      destChain,
+      true,
+      RELAYER_FEE,
+      TIMEOUT
+    );
+
+    vm.stopPrank();
+  }
+
+  function test_BridgeTokens_RevertsOnInsufficientBalance() public {
+    vm.startPrank(user);
+
+    mockToken.approve(address(tokenBridge), 1100 ether);
+    bytes memory destChain = bytes("ethereum");
+
+    vm.expectRevert(InsufficientBalance.selector);
+    tokenBridge.bridgeTokens{value: 0.1 ether}(
+      address(mockToken),
+      1100 ether,
+      recipient,
       destChain,
       true,
       RELAYER_FEE,
