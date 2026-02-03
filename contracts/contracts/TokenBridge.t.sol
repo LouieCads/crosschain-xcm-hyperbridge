@@ -99,4 +99,24 @@ contract TokenBridgeTest is Test {
 
     vm.stopPrank();
   }
+
+  function test_BridgeTokens_RevertsOnInvalidRecipient() public {
+    vm.startPrank(user);
+
+    mockToken.approve(address(tokenBridge), BRIDGE_AMOUNT);
+    bytes memory destChain = bytes("ethereum");
+
+    vm.expectRevert(InvalidRecipient.selector);
+    tokenBridge.bridgeTokens{value: 0.1 ether}(
+      address(mockToken),
+      BRIDGE_AMOUNT,
+      address(0),
+      destChain,
+      true,
+      RELAYER_FEE,
+      TIMEOUT
+    );
+
+    vm.stopPrank();
+  }
 }
