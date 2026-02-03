@@ -187,4 +187,38 @@ contract TokenBridgeTest is Test {
     bytes32 actual = tokenBridge.deriveAssetId(token);
     assertEq(actual, expected);
   }
+
+  function testFuzz_BridgeTokens(
+    uint256 amount, 
+    uint256 relayerFee, 
+    uint64 timeout
+  ) public {
+    amount = bound(amount, 1 ether, INITIAL_BALANCE);
+    relayerFee = bound(relayerFee, 0, amount / 2);
+    timeout = uint64(bound(timeout, 60, 86400));
+
+    vm.startPrank(user);
+    mockToken.approve(address(tokenBridge), amount);
+    bytes memory destChain = bytes("ethereum");
+
+    tokenBridge.bridgeTokens{value: 0.1 ether}(
+      address(mockToken),
+      amount,
+      recipient,
+      destChain,
+      true,
+      relayerFee,
+      timeout
+    );
+
+    vm.stopPrank();
+
+    assertEq(mockToken.balanceOf(address(tokenBridge)), amount);
+    assertTrue(mockGateway.teleportCalled());
+
+    TeleportParams memory params = mockGateway.lastTeleportParams();
+    assertEq(params.amount, amount);
+    assertEq(params.relayerFee, relayerFee);
+    assertEq(params.timeout, timeout);
+  }
 }
