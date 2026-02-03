@@ -80,4 +80,23 @@ contract TokenBridgeTest is Test {
     assertEq(params.timeout, TIMEOUT);
     assertEq(params.nativeCost, 0.1 ether);
   }
+
+  function test_BridgeTokens_RevertsOnZeroAmount() public {
+    vm.startPrank(user);
+
+    bytes memory destChain = bytes("ethereum");
+
+    vm.expectRevert(InsufficientAmount.selector);
+    tokenBridge.bridgeTokens{value: 0.1 ether}(
+      address(mockToken),
+      0,
+      recipient,
+      destChain,
+      true,
+      RELAYER_FEE,
+      TIMEOUT
+    );
+
+    vm.stopPrank();
+  }
 }
