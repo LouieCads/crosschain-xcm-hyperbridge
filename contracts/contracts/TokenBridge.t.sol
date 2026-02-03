@@ -180,4 +180,11 @@ contract TokenBridgeTest is Test {
     TeleportParams memory params = mockGateway.lastTeleportParams();
     assertFalse(params.redeem);
   }
+
+  function test_DeriveAssetId() public view {
+    address token = address(0x1234567890123456789012345678901234567890);
+    bytes32 expected = bytes32(uint256(uint160(token)));
+    bytes32 actual = tokenBridge.deriveAssetId(token);
+    assertEq(actual, expected);
+  }
 }
