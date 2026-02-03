@@ -36,4 +36,48 @@ contract TokenBridgeTest is Test {
     assertEq(address(tokenBridge.tokenGateway()), address(mockGateway));
     assertEq(tokenBridge.feeToken(), address(feeToken));
   }
+
+  function test_BridgeTokens_Success() public {
+    vm.startPrank(user);
+
+    mockToken.approve(address(tokenBridge), BRIDGE_AMOUNT);
+    bytes memory destChain = bytes("ethereum");
+
+    vm.expectEmit(true, true, true, true);
+    emit TokenBridge.BridgeInitiated(
+      address(mockToken),
+      user,
+      bytes32(uint256(uint160(address(mockToken)))),
+      bytes32(uint256(uint160(recipient))),
+      BRIDGE_AMOUNT,
+      destChain
+    );
+
+    tokenBridge.bridgeTokens{value: 0.1 ether}(
+      address(mockToken),
+      BRIDGE_AMOUNT,
+      recipient,
+      destChain,
+      true,
+      RELAYER_FEE,
+      TIMEOUT
+    );
+
+    vm.stopPrank();
+
+    assertEq(mockToken.balanceOf(user), INITIAL_BALANCE - BRIDGE_AMOUNT);
+    assertEq(mockToken.balanceOf(address(tokenBridge)), BRIDGE_AMOUNT);
+    assertTrue(mockGateway.teleportCalled());
+    assertEq(mockGateway.lastMsgValue(), 0.1 ether);
+
+    TeleportParams memory params = mockGateway.lastTeleportParams();
+    assertEq(params.amount, BRIDGE_AMOUNT);
+    assertEq(params.relayerFee, RELAYER_FEE);
+    assertEq(params.assetId, bytes32(uint256(uint160(address(mockToken)))));
+    assertTrue(params.redeem);
+    assertEq(params.to, bytes32(uint256(uint160(recipient))));
+    assertEq(params.dest, destChain);
+    assertEq(params.timeout, TIMEOUT);
+    assertEq(params.nativeCost, 0.1 ether);
+  }
 }
