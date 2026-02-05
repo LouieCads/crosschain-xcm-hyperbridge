@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it, beforeEach } from "node:test";
-import { parseEther, type Address, type WalletClient, type PublicClient } from "viem";
+import { parseEther, stringToHex, type Address, type WalletClient, type PublicClient } from "viem";
 import { network } from "hardhat";
 
 import MockERC20Artifact from "../artifacts/contracts/mocks/MockERC20.sol/MockERC20.json";
@@ -103,6 +103,15 @@ describe("TokenBridge", async function () {
     // ============================================
     // Setup: Mint tokens to user
     // ============================================
+    const mintHash = await walletClient.writeContract({
+      address: mockTokenAddress,
+      abi: MockERC20Artifact.abi,
+      functionName: "mint",
+      args: [user, INITIAL_BALANCE],
+      account: deployer,
+    });
+    await publicClient.waitForTransactionReceipt({ hash: mintHash });
+
     const mintFeeHash = await walletClient.writeContract({
       address: feeTokenAddress,
       abi: MockERC20Artifact.abi,
@@ -151,6 +160,116 @@ describe("TokenBridge", async function () {
       args: [user],
     });
     
-    assert.equal(userBalance, INITIAL_BALANCE, "User should have initial balance");
+    assert.equal(userBalance, INITIAL_BALANCE, "User should haveccd initial balance");
+  });
+
+  it("should bridge tokens successfully", async function () {
+    // Step 1: Check initial balance
+    const initialBalance = await publicClient.readContract({
+      address: mockTokenAddress,
+      abi: MockERC20Artifact.abi,
+      functionName: "balanceOf",
+      args: [user],
+    });
+    
+    // Step 2: Approve TokenBridge to spend tokens
+    const approveHash = await walletClient.writeContract({
+      address: mockTokenAddress,
+      abi: MockERC20Artifact.abi,
+      functionName: "approve",
+      args: [tokenBridgeAddress, BRIDGE_AMOUNT],
+      account: user,
+    });
+    await publicClient.waitForTransactionReceipt({ hash: approveHash });
+    
+    // Step 3: Bridge tokens
+    const destChain = stringToHex("ethereum", { size: 32 });
+    
+    const bridgeHash = await walletClient.writeContract({
+      address: tokenBridgeAddress,
+      abi: TokenBridgeArtifact.abi,
+      functionName: "bridgeTokens",
+      args: [
+        mockTokenAddress,     
+        BRIDGE_AMOUNT,       
+        recipient,            
+        destChain,            
+        true,                  
+        RELAYER_FEE,          
+        TIMEOUT,            
+      ],
+      account: user,
+      value: parseEther("0.1"), 
+    });
+    
+    const receipt = await publicClient.waitForTransactionReceipt({ 
+      hash: bridgeHash 
+    });
+    
+    // Step 4: Verify balances changed
+    const finalUserBalance = await publicClient.readContract({
+      address: mockTokenAddress,
+      abi: MockERC20Artifact.abi,
+      functionName: "balanceOf",
+      args: [user],
+    });
+    
+    const bridgeBalance = await publicClient.readContract({
+      address: mockTokenAddress,
+      abi: MockERC20Artifact.abi,
+      functionName: "balanceOf",
+      args: [tokenBridgeAddress],
+    });
+    
+    assert.equal(
+      finalUserBalance,
+      INITIAL_BALANCE - BRIDGE_AMOUNT,
+      "User balance should decrease"
+    );
+    
+    assert.equal(
+      bridgeBalance,
+      BRIDGE_AMOUNT,
+      "Bridge should hold tokens"
+    );
+    
+    const logs = receipt.logs;
+    assert.ok(logs.length > 0, "Should emit events");
+  });
+
+  it("should bridge with redeem false", async function () {
+    const approveHash = await walletClient.writeContract({
+      address: mockTokenAddress,
+      abi: MockERC20Artifact.abi,
+      functionName: "approve",
+      args: [tokenBridgeAddress, BRIDGE_AMOUNT],
+      account: user,
+    });
+    await publicClient.waitForTransactionReceipt({ hash: approveHash });
+    
+    const destChain = stringToHex("bsc", { size: 32 });
+    
+    const bridgeHash = await walletClient.writeContract({
+      address: tokenBridgeAddress,
+      abi: TokenBridgeArtifact.abi,
+      functionName: "bridgeTokens",
+      args: [
+        mockTokenAddress,
+        BRIDGE_AMOUNT,
+        recipient,
+        destChain,
+        false, 
+        RELAYER_FEE,
+        TIMEOUT,
+      ],
+      account: user,
+      value: parseEther("0.1"),
+    });
+    
+    const receipt = await publicClient.waitForTransactionReceipt({ 
+      hash: bridgeHash 
+    });
+    
+    assert.ok(receipt.status === "success", "Transaction should succeed");
   });
 });
