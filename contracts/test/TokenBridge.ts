@@ -36,11 +36,9 @@ describe("TokenBridge", async function () {
     user = account1;
     recipient = account2;
     
-    console.log("Deployer:", deployer);
-    console.log("User:", user);
-    console.log("Recipient:", recipient);
-
-    console.log("\nDeploying Mock ERC20 Token...");
+    // ============================================
+    // Deploy Mock ERC20 Token
+    // ============================================
     const mockTokenHash = await walletClient.deployContract({
       abi: MockERC20Artifact.abi,
       bytecode: MockERC20Artifact.bytecode as `0x${string}`,
@@ -51,9 +49,10 @@ describe("TokenBridge", async function () {
       hash: mockTokenHash,
     });
     mockTokenAddress = mockTokenReceipt.contractAddress!;
-    console.log("Mock ERC20 Token deployed at:", mockTokenAddress);
 
-    console.log("\nDeploying Fee Token...");
+    // ============================================
+    // Deploy Fee Token
+    // ============================================
     const feeTokenHash = await walletClient.deployContract({
       abi: MockERC20Artifact.abi,
       bytecode: MockERC20Artifact.bytecode as `0x${string}`,
@@ -64,9 +63,10 @@ describe("TokenBridge", async function () {
       hash: feeTokenHash,
     });
     feeTokenAddress = feeTokenReceipt.contractAddress;
-    console.log("FeeToken deployed at:", feeTokenAddress)
 
-    console.log("\nDeploying Mock Gateway...");
+    // ============================================
+    // Deploy Mock Gateway
+    // ============================================
     const mockGatewayHash = await walletClient.deployContract({
       abi: MockGatewayArtifact.abi,
       bytecode: MockGatewayArtifact.bytecode as `0x${string}`,
@@ -81,9 +81,10 @@ describe("TokenBridge", async function () {
       hash: mockGatewayHash,
     });
     mockGatewayAddress = mockGatewayReceipt.contractAddress!;
-    console.log("Mock Gateway deployed at:", mockGatewayAddress);
 
-    console.log("\nDeploying TokenBridge...");
+    // ============================================
+    // Deploy TokenBridge
+    // ============================================
     const tokenBridgeHash = await walletClient.deployContract({
       abi: TokenBridgeArtifact.abi,
       bytecode: TokenBridgeArtifact.bytecode as `0x${string}`,
@@ -98,8 +99,10 @@ describe("TokenBridge", async function () {
       hash: tokenBridgeHash,
     });
     tokenBridgeAddress = tokenBridgeReceipt.contractAddress!;
-    console.log("TokenBridge deployed at:", tokenBridgeAddress);
 
+    // ============================================
+    // Setup: Mint tokens to user
+    // ============================================
     const mintFeeHash = await walletClient.writeContract({
       address: feeTokenAddress,
       abi: MockERC20Artifact.abi,
@@ -108,12 +111,18 @@ describe("TokenBridge", async function () {
       account: deployer,
     });
     await publicClient.waitForTransactionReceipt({ hash: mintFeeHash });
-    console.log("\nMinted fee tokens to user\n");
   });
   
   it("should have test accounts", async function () {
     assert.ok(deployer, "Deployer should exist");
     assert.ok(user, "User should exist");
     assert.ok(recipient, "Recipient should exist");
+  });
+
+  it("should deploy contracts successfully", async function () {
+    assert.ok(tokenBridgeAddress, "TokenBridge should be deployed");
+    assert.ok(mockTokenAddress, "Mock Token should be deployed");
+    assert.ok(feeTokenAddress, "Fee Token should be deployed");
+    assert.ok(mockGatewayAddress, "Mock Gateway should be deployed");
   });
 });
