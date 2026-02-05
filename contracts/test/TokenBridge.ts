@@ -125,4 +125,32 @@ describe("TokenBridge", async function () {
     assert.ok(feeTokenAddress, "Fee Token should be deployed");
     assert.ok(mockGatewayAddress, "Mock Gateway should be deployed");
   });
+
+  it("should set correct gateway and fee token", async function () {
+    const gateway = await publicClient.readContract({
+      address: tokenBridgeAddress,
+      abi: TokenBridgeArtifact.abi,
+      functionName: "tokenGateway",
+    });
+    
+    const feeToken = await publicClient.readContract({
+      address: tokenBridgeAddress,
+      abi: TokenBridgeArtifact.abi,
+      functionName: "feeToken",
+    });
+    
+    assert.equal(gateway.toLowerCase(), mockGatewayAddress.toLowerCase(), "Gateway should match");
+    assert.equal(feeToken.toLowerCase(), feeTokenAddress.toLowerCase(), "Fee token should match");
+  });
+
+  it("should have correct initial balances", async function () {
+    const userBalance = await publicClient.readContract({
+      address: feeTokenAddress,
+      abi: MockERC20Artifact.abi,
+      functionName: "balanceOf",
+      args: [user],
+    });
+    
+    assert.equal(userBalance, INITIAL_BALANCE, "User should have initial balance");
+  });
 });
