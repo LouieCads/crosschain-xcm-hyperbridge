@@ -422,4 +422,80 @@ describe("TokenBridge", async function () {
     
     assert.equal(assetId.toLowerCase(), expected.toLowerCase(), "Asset ID should match");
   });
+
+  it("should handle multiple bridges in sequence", async function () {
+    const smallAmount = parseEther("10");
+    const destChain = stringToHex("ethereum", { size: 32 });
+    
+    // Approve for multiple bridges
+    const approveHash = await walletClient.writeContract({
+      address: mockTokenAddress,
+      abi: MockERC20Artifact.abi,
+      functionName: "approve",
+      args: [tokenBridgeAddress, INITIAL_BALANCE],
+      account: user,
+    });
+    await publicClient.waitForTransactionReceipt({ hash: approveHash });
+    
+    // First bridge
+    const bridge1Hash = await walletClient.writeContract({
+      address: tokenBridgeAddress,
+      abi: TokenBridgeArtifact.abi,
+      functionName: "bridgeTokens",
+      args: [mockTokenAddress, smallAmount, recipient, destChain, true, RELAYER_FEE, TIMEOUT],
+      account: user,
+      value: parseEther("0.1"),
+    });
+    await publicClient.waitForTransactionReceipt({ hash: bridge1Hash });
+    
+    // Second bridge
+    const bridge2Hash = await walletClient.writeContract({
+      address: tokenBridgeAddress,
+      abi: TokenBridgeArtifact.abi,
+      functionName: "bridgeTokens",
+      args: [mockTokenAddress, smallAmount, recipient, destChain, true, RELAYER_FEE, TIMEOUT],
+      account: user,
+      value: parseEther("0.1"),
+    });
+    await publicClient.waitForTransactionReceipt({ hash: bridge2Hash });
+    
+    const bridgeBalance = await publicClient.readContract({
+      address: mockTokenAddress,
+      abi: MockERC20Artifact.abi,
+      functionName: "balanceOf",
+      args: [tokenBridgeAddress],
+    });
+    
+    assert.equal(bridgeBalance, smallAmount * 2n, "Bridge should hold tokens from both bridges");
+  });
+
+  it("should bridge to different chains", async function () {
+    const chains = ["ethereum", "bsc", "polygon"];
+    const smallAmount = parseEther("10");
+    
+    const approveHash = await walletClient.writeContract({
+      address: mockTokenAddress,
+      abi: MockERC20Artifact.abi,
+      functionName: "approve",
+      args: [tokenBridgeAddress, INITIAL_BALANCE],
+      account: user,
+    });
+    await publicClient.waitForTransactionReceipt({ hash: approveHash });
+    
+    for (const chain of chains) {
+      const destChain = stringToHex(chain, { size: 32 });
+      
+      const bridgeHash = await walletClient.writeContract({
+        address: tokenBridgeAddress,
+        abi: TokenBridgeArtifact.abi,
+        functionName: "bridgeTokens",
+        args: [mockTokenAddress, smallAmount, recipient, destChain, true, RELAYER_FEE, TIMEOUT],
+        account: user,
+        value: parseEther("0.1"),
+      });
+      
+      const receipt = await publicClient.waitForTransactionReceipt({ hash: bridgeHash });
+      assert.ok(receipt.status === "success", `Bridge to ${chain} should succeed`);
+    }
+  });
 });
