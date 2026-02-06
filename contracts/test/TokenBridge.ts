@@ -272,4 +272,139 @@ describe("TokenBridge", async function () {
     
     assert.ok(receipt.status === "success", "Transaction should succeed");
   });
+
+  it("should revert when amount is zero", async function () {
+    const destChain = stringToHex("ethereum", { size: 32 });
+    
+    try {
+      await walletClient.writeContract({
+        address: tokenBridgeAddress,
+        abi: TokenBridgeArtifact.abi,
+        functionName: "bridgeTokens",
+        args: [
+          mockTokenAddress,
+          0n, 
+          recipient,
+          destChain,
+          true,
+          RELAYER_FEE,
+          TIMEOUT,
+        ],
+        account: user,
+        value: parseEther("0.1"),
+      });
+      
+      assert.fail("Should have reverted");
+    } catch (error: any) {
+      assert.ok(
+        error.message.includes("InsufficientAmount") || 
+        error.message.includes("revert"),
+        "Should revert with InsufficientAmount"
+      );
+    }
+  });
+
+  it("should revert when recipient is zero address", async function () {
+    const approveHash = await walletClient.writeContract({
+      address: mockTokenAddress,
+      abi: MockERC20Artifact.abi,
+      functionName: "approve",
+      args: [tokenBridgeAddress, BRIDGE_AMOUNT],
+      account: user,
+    });
+    await publicClient.waitForTransactionReceipt({ hash: approveHash });
+    
+    const destChain = stringToHex("ethereum", { size: 32 });
+    
+    try {
+      await walletClient.writeContract({
+        address: tokenBridgeAddress,
+        abi: TokenBridgeArtifact.abi,
+        functionName: "bridgeTokens",
+        args: [
+          mockTokenAddress,
+          BRIDGE_AMOUNT,
+          "0x0000000000000000000000000000000000000000",
+          destChain,
+          true,
+          RELAYER_FEE,
+          TIMEOUT,
+        ],
+        account: user,
+        value: parseEther("0.1"),
+      });
+      
+      assert.fail("Should have reverted");
+    } catch (error: any) {
+      assert.ok(
+        error.message.includes("InvalidRecipient") || 
+        error.message.includes("revert"),
+        "Should revert with InvalidRecipient"
+      );
+    }
+  });
+
+  it("should revert when insufficient balance", async function () {
+    const approveHash = await walletClient.writeContract({
+      address: mockTokenAddress,
+      abi: MockERC20Artifact.abi,
+      functionName: "approve",
+      args: [tokenBridgeAddress, BRIDGE_AMOUNT],
+      account: user,
+    });
+    await publicClient.waitForTransactionReceipt({ hash: approveHash });
+
+    const destChain = stringToHex("ethereum", { size: 32 });
+    
+    try {
+      await walletClient.writeContract({
+        address: tokenBridgeAddress,
+        abi: TokenBridgeArtifact.abi,
+        functionName: "bridgeTokens",
+        args: [
+          mockTokenAddress,
+          1000n * 10n ** 18n, 
+          recipient,
+          destChain,
+          true,
+          RELAYER_FEE,
+          TIMEOUT,
+        ],
+        account: user,
+        value: parseEther("0.1"),
+      });
+      
+      assert.fail("Should have reverted");
+    } catch (error: any) {
+      assert.ok(error.message.includes("revert"), "Should revert");
+    }
+  });
+
+  it("should revert when insufficient allowance", async function () {
+    const destChain = stringToHex("ethereum", { size: 32 });
+    
+    try {
+      // Don't approve tokens
+      await walletClient.writeContract({
+        address: tokenBridgeAddress,
+        abi: TokenBridgeArtifact.abi,
+        functionName: "bridgeTokens",
+        args: [
+          mockTokenAddress,
+          BRIDGE_AMOUNT,
+          recipient,
+          destChain,
+          true,
+          RELAYER_FEE,
+          TIMEOUT,
+        ],
+        account: user,
+        value: parseEther("0.1"),
+      });
+      
+      assert.fail("Should have reverted");
+    } catch (error: any) {
+      assert.ok(error.message.includes("revert"), "Should revert");
+    }
+  });
 });
