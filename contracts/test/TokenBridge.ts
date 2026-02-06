@@ -407,4 +407,19 @@ describe("TokenBridge", async function () {
       assert.ok(error.message.includes("revert"), "Should revert");
     }
   });
+
+  it("should derive asset ID correctly", async function () {
+    const testAddress = mockTokenAddress;
+    
+    const assetId = await publicClient.readContract({
+      address: tokenBridgeAddress,
+      abi: TokenBridgeArtifact.abi,
+      functionName: "deriveAssetId",
+      args: [testAddress],
+    });
+    
+    const expected = `0x${testAddress.slice(2).padStart(64, '0')}`;
+    
+    assert.equal(assetId.toLowerCase(), expected.toLowerCase(), "Asset ID should match");
+  });
 });
