@@ -100,7 +100,7 @@
 				destChain: destChain,
 				redeem: redeem,
 				relayerFee: 0n,
-				timeout: 3600n,
+				timeout: 3600,
 				nativeCost: 0n
 			};
 

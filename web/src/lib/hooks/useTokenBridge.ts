@@ -12,7 +12,7 @@ export interface BridgeTokensParams {
   destChain: string;
   redeem?: boolean;
   relayerFee?: bigint;
-  timeout?: bigint;
+  timeout?: number;
   nativeCost?: bigint;
 }
 
@@ -34,7 +34,7 @@ export async function bridgeTokens(params: BridgeTokensParams): Promise<BridgeTo
     destChain,
     redeem = true,
     relayerFee = 0n,
-    timeout = 3600n,
+    timeout = 3600,
     nativeCost = 0n,
   } = params;
 
@@ -72,8 +72,7 @@ export async function bridgeTokens(params: BridgeTokensParams): Promise<BridgeTo
     address: tokenBridgeAddress,
     abi: TOKEN_BRIDGE_ABI,
     functionName: 'bridgeTokens',
-    args: [token, amount, recipient, destChainBytes, redeem, relayerFee, timeout],
-    value: nativeCost,
+    args: [token, amount, recipient, destChainBytes, redeem, relayerFee, BigInt(timeout)],
   });
 
   // Step 4: Wait for transaction receipt
