@@ -14,7 +14,7 @@ export const wagmiConfig: Config = createConfig({
 	connectors: [injected()],
 	transports: {
 		[hardhat.id]: http('http://127.0.0.1:8545'),
-		[sepolia.id]: http('https://rpc.sepolia.dev'),
+		[sepolia.id]: http('https://ethereum-sepolia-rpc.publicnode.com'),
 		[polygonAmoy.id]: http('https://rpc-amoy.polygon.technology')
 	},
 	ssr: false

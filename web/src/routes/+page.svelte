@@ -9,7 +9,7 @@
 	import type { Address } from 'viem';
 
 	// USD.h token address on Sepolia
-	const USDH_ADDRESS = '0xA801da100bF16D07F668F4A49E1f71fc54D05177' as Address;
+	const USDH_ADDRESS = '0xA801da100bF16D07F668F4A49E1f71fc54D05177' as `0x${string}`;
 
 	let tokenAddress = $state('');
 	let amount = $state('');
@@ -94,7 +94,7 @@
 		isLoading = true;
 
 		try {
-			const amountBigInt = parseUnits(amount, tokenDecimals);
+			const amountBigInt = parseUnits(amount.toString(), tokenDecimals);
 
 			const params: BridgeTokensParams = {
 				token: tokenAddress as Address,
@@ -108,7 +108,7 @@
 			};
 
 			const result = await bridgeTokens(params);
-			success = `Bridge transaction successful! TX: ${result.txHash}`;
+			success = `Bridge transaction confirmed! TX: ${result.txHash}`;
 			
 			amount = '';
 			recipientAddress = '';
@@ -291,7 +291,7 @@
 				class="w-full py-3 cursor-pointer px-4 bg-[#3A52A6] hover:to-[#4A62B6] text-white font-semibold text-base rounded-2xl shadow-md shadow-[#3A52A6]/30 hover:shadow-lg hover:shadow-[#3A52A6]/40 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-xl flex items-center justify-center gap-3 hover:-translate-y-0.5 active:translate-y-0 disabled:hover:translate-y-0"
 			>
 				{#if isLoading}
-					<span>Processing Transaction...</span>
+					<span>Processing...</span>
 				{:else}
 					<span>Swap</span>
 				{/if}
