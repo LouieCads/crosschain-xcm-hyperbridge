@@ -8,6 +8,9 @@
 	import { parseUnits } from 'viem';
 	import type { Address } from 'viem';
 
+	// USD.h token address on Sepolia
+	const USDH_ADDRESS = '0xA801da100bF16D07F668F4A49E1f71fc54D05177' as Address;
+
 	let tokenAddress = $state('');
 	let amount = $state('');
 	let recipientAddress = $state('');
@@ -22,8 +25,8 @@
 	let tokenDecimals = $state<number>(18);
 
 	$effect(() => {
-    if ($isConnected && $address && !tokenAddress) {
-        tokenAddress = $address;
+    if ($isConnected && !tokenAddress) {
+        tokenAddress = USDH_ADDRESS;
     }
 	});
 

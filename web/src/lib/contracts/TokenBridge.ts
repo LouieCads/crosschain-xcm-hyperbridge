@@ -179,9 +179,9 @@ export const TOKEN_BRIDGE_ADDRESSES = {
   // Hardhat localhost network (chain ID: 31337)
   hardhat: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as `0x${string}`,
   // Sepolia testnet (chain ID: 11155111)
-  // sepolia: '' as `0x${string}`,
+  sepolia: '0x69660dd0bbA8ce6D534c79aA666E682Eff73afB0' as `0x${string}`,
   // Amoy testnet (chain ID: 80002)
-  // amoy: '' as `0x${string}`,
+  amoy: '0x3ccE4B043105863c0a95c03C1D5F2563e4a16781' as `0x${string}`,
 } as const;
 
 /**
@@ -191,10 +191,10 @@ export function getContractAddress(chainId: number): `0x${string}` | undefined {
   switch (chainId) {
     case 31337: // Hardhat localhost
       return TOKEN_BRIDGE_ADDRESSES.hardhat;
-    // case 11155111: // Sepolia
-    //   return TOKEN_BRIDGE_ADDRESSES.sepolia;
-    // case 80002: // Amoy
-    //   return TOKEN_BRIDGE_ADDRESSES.amoy;
+    case 11155111: // Sepolia
+      return TOKEN_BRIDGE_ADDRESSES.sepolia;
+    case 80002: // Amoy
+      return TOKEN_BRIDGE_ADDRESSES.amoy;
     default:
       return undefined;
   }
