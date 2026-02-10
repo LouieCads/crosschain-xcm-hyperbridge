@@ -34,5 +34,23 @@ export default defineConfig({
       url: configVariable("SEPOLIA_RPC_URL"),
       accounts: [configVariable("SEPOLIA_PRIVATE_KEY")],
     },
+    amoy: {
+      type: "http",
+      chainType: "l1",
+      url: configVariable("AMOY_RPC_URL"),
+      accounts: [configVariable("AMOY_PRIVATE_KEY")],
+    },
+    polygon: {
+      type: "http",
+      chainType: "l1",
+      url: configVariable("POLYGON_RPC_URL"),
+      accounts: [configVariable("POLYGON_PRIVATE_KEY")],
+      chainId: 137,
+    },
+  },
+  verify: {
+    etherscan: {
+      apiKey: configVariable("ETHERSCAN_API_KEY"),
+    },
   },
 });

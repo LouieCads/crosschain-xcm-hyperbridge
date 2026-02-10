@@ -1,0 +1,6 @@
+{
+  "TokenBridgeModule": {
+    "tokenGateway": "0x2efdc11b11cac34697b992a56e1d245c137a05b2",
+    "feeToken": "0x693b854d6965ffeaae21c74049dea644b56fcacb"
+  }
+}
