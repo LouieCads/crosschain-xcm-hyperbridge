@@ -34,13 +34,13 @@
 		href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
 		rel="stylesheet"
 	/>
-	<title>Hyperbridge</title>
+	<title>Crosschain</title>
 </svelte:head>
 
 <div class="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/50 dark:from-[#0F1419] dark:via-[#0F1419] dark:to-[#1A1F2E] transition-colors duration-300">
 	<Header />
 
-	<main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+	<main class="flex-1 w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 		{@render children()}
 	</main>
 
