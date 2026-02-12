@@ -240,7 +240,6 @@
 						class="w-full px-4 py-3 text-sm bg-transparent border-1 border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:outline-none focus:ring-0 focus:border-0 outline-none transition-all text-gray-900 dark:text-gray-100 cursor-pointer font-medium"
 					>
 						<option value="sepolia">Sepolia</option>
-						<option value="localhost">Localhost</option>
 					</select>
 				</div>
 

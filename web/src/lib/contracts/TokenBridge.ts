@@ -170,7 +170,6 @@ export const TOKEN_BRIDGE_ABI = [
       "type": "function"
     }
   ] as const;
-
   
 /**
  * Contract Addresses 
@@ -180,6 +179,8 @@ export const TOKEN_BRIDGE_ADDRESSES = {
   hardhat: '0x5FbDB2315678afecb367f032d93F642f64180aa3' as `0x${string}`,
   // Sepolia testnet (chain ID: 11155111)
   sepolia: '0x69660dd0bbA8ce6D534c79aA666E682Eff73afB0' as `0x${string}`,
+  // BSC Testnet (chain ID: 97)
+  bscTestnet: '0x048c39a7f1dcD4589d5359ebD010A0dEEBBe08f0' as `0x${string}`,
 } as const;
 
 /**
@@ -191,6 +192,8 @@ export function getContractAddress(chainId: number): `0x${string}` | undefined {
       return TOKEN_BRIDGE_ADDRESSES.hardhat;
     case 11155111: // Sepolia
       return TOKEN_BRIDGE_ADDRESSES.sepolia;
+    case 97: // BSC Testnet
+      return TOKEN_BRIDGE_ADDRESSES.bscTestnet;
     default:
       return undefined;
   }
